@@ -1,0 +1,29 @@
+{
+    "name": "assignment-analyzer-backend",
+    "version": "1.0.0",
+    "description": "Backend server for assignment analyzer",
+    "main": "dist/index.js",
+    "scripts": {
+        "start": "node dist/index.js",
+        "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+        "build": "tsc",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "cors": "^2.8.5",
+        "dayjs": "^1.11.13",
+        "dotenv": "^16.0.3",
+        "express": "^4.18.2",
+        "multer": "^1.4.5-lts.1",
+        "openai": "^4.0.0",
+        "pdfjs-dist": "^2.16.105"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.13",
+        "@types/express": "^4.17.17",
+        "@types/multer": "^1.4.7",
+        "@types/node": "^18.15.11",
+        "ts-node-dev": "^2.0.0",
+        "typescript": "^5.0.4"
+    }
+}

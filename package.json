@@ -1,0 +1,22 @@
+{
+  "name": "assignment-timeline",
+  "version": "1.0.0",
+  "description": "Assignment Timeline Assistant",
+  "scripts": {
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "start:frontend": "cd frontend && npm start",
+    "start:backend": "cd backend && npm run dev",
+    "dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "@types/react-datepicker": "^6.2.0",
+    "axios": "^1.9.0",
+    "firebase": "^11.8.1",
+    "openai": "^4.103.0",
+    "pdfjs-dist": "^5.2.133",
+    "react-datepicker": "^8.3.0"
+  }
+}

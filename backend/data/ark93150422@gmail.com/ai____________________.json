@@ -1,0 +1,65 @@
+{
+  "title": "AI 모듈 통신 및 데이터 처리 프로젝트",
+  "summary": "이 과제는 팀 프로젝트로, GitHub repository를 포크하여 3가지 버전의 구현물을 개발하고, AI 모듈과 서버, 엣지 간의 통신을 구현하는 것입니다. 각 팀원은 서로 다른 벡터를 구현하여 데이터 전송량을 줄이고, 통신 프로토콜을 설계하여 일관된 데이터 교환을 수행합니다.",
+  "difficulty": "어려움",
+  "estimatedTime": "20시간",
+  "dueDate": "2025-06-12",
+  "steps": [
+    {
+      "title": "GitHub Repository 포크 및 클론",
+      "description": "팀원 3명의 GitHub ID로 각각 프로젝트를 포크하고, 로컬에 클론합니다.",
+      "tip": "포크 후 각자 다른 이름으로 저장소를 생성하여 관리하세요.",
+      "date": "2025-06-09",
+      "completed": false,
+      "status": "pending"
+    },
+    {
+      "title": "프로젝트 기본 실행 환경 설정",
+      "description": "VSCode에서 세션을 실행하고 필요한 패키지를 설치한 후, ai-module, server, edge를 실행합니다.",
+      "tip": "requirements.txt 파일이 있는지 확인하고, 없다면 올바른 디렉토리에 있는지 다시 확인하세요.",
+      "date": "2025-06-09",
+      "completed": false,
+      "status": "pending"
+    },
+    {
+      "title": "데이터셋 이해 및 Task 1 수행",
+      "description": "edge 디렉토리의 raw_data.h 파일을 통해 데이터셋을 이해하고, processData() 함수를 수정하여 3가지 벡터를 생성합니다.",
+      "tip": "데이터셋의 구조를 이해하기 위해 test_process.cpp 파일을 참고하세요.",
+      "date": "2025-06-10",
+      "completed": false,
+      "status": "pending"
+    },
+    {
+      "title": "Task 2: 프로토콜 설계 및 구현",
+      "description": "edge와 server 간의 데이터 전송을 위한 일관된 프로토콜을 설계하고, sendData()와 handler() 함수에 구현합니다.",
+      "tip": "테스트 파일인 test_client.cpp와 test_server.py를 참고하여 프로토콜 구현을 연습하세요.",
+      "date": "2025-06-10",
+      "completed": false,
+      "status": "pending"
+    },
+    {
+      "title": "Task 3: AI 모듈과의 통신 구현",
+      "description": "server.py에서 AI 모듈의 REST API와 통신을 구현합니다. requests 라이브러리를 사용하여 API 호출을 처리합니다.",
+      "tip": "AI 모듈의 API 문서를 잘 읽고, test_control_server.py 파일을 참고하여 API 사용 방법을 익히세요.",
+      "date": "2025-06-11",
+      "completed": false,
+      "status": "pending"
+    },
+    {
+      "title": "추가 과제 I: 데이터셋의 상속 구조 설계",
+      "description": "data 디렉토리 내의 헤더 파일들 간의 공통 부분을 별도의 클래스로 분리하고 상속 구조를 설계합니다.",
+      "tip": "기존의 파일 외에는 수정하지 않도록 주의하면서 상속 관계를 설계하세요.",
+      "date": "2025-06-11",
+      "completed": false,
+      "status": "pending"
+    },
+    {
+      "title": "추가 과제 II: 코드 주석 작성",
+      "description": "지정된 파일의 각 함수에 대해 상세 주석을 작성하여 코드의 기능을 설명합니다.",
+      "tip": "함수의 의도를 파악하고, 각 단계별로 주석을 달아 이해하기 쉽게 만드세요.",
+      "date": "2025-06-12",
+      "completed": false,
+      "status": "pending"
+    }
+  ]
+}

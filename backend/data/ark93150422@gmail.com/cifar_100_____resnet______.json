@@ -1,0 +1,65 @@
+{
+  "title": "CIFAR-100을 위한 ResNet 모델 구현",
+  "summary": "이 과제는 CIFAR-100 데이터셋에서 ResNet 기반 모델을 구현하여 100개 카테고리 중 하나로 이미지를 분류하는 것입니다. 목표는 80% 이상의 테스트 정확도를 달성하는 것이며, 간결한 코드 구현과 짧은 보고서를 제출해야 합니다.",
+  "difficulty": "어려움",
+  "estimatedTime": "20시간",
+  "dueDate": "2025-06-15",
+  "steps": [
+    {
+      "title": "데이터셋 준비 및 전처리",
+      "description": "CIFAR-100 데이터셋을 다운로드하고, 데이터 증강 및 정규화를 포함한 적절한 전처리를 수행합니다.",
+      "tip": "torchvision.datasets.CIFAR100을 사용하여 데이터셋을 쉽게 다운로드할 수 있습니다.",
+      "date": "2025-06-09",
+      "completed": false,
+      "status": "pending"
+    },
+    {
+      "title": "ResNet 모델 구성",
+      "description": "ResNet-18 또는 ResNet-50 모델을 구성하고, 최종 레이어를 100개 클래스에 맞게 조정합니다.",
+      "tip": "사전 훈련된 ImageNet 가중치를 사용할 경우, 최종 FC 레이어를 잊지 말고 변경하세요.",
+      "date": "2025-06-10",
+      "completed": false,
+      "status": "pending"
+    },
+    {
+      "title": "훈련 설정 구성",
+      "description": "교차 엔트로피 손실과 적절한 옵티마이저 및 학습률 스케줄러를 설정합니다.",
+      "tip": "SGD와 모멘텀을 사용하고 학습률 감소를 계획하세요.",
+      "date": "2025-06-11",
+      "completed": false,
+      "status": "pending"
+    },
+    {
+      "title": "모델 훈련",
+      "description": "훈련 루프를 구현하여 각 에포크마다 훈련 손실 및 정확도를 출력하고, 모델을 훈련합니다.",
+      "tip": "훈련 중간에 학습률을 조정하여 모델 성능을 최적화하세요.",
+      "date": "2025-06-12",
+      "completed": false,
+      "status": "pending"
+    },
+    {
+      "title": "모델 평가",
+      "description": "테스트 세트에서 최종 모델의 정확도를 평가합니다.",
+      "tip": "최종 평가 전에 모델을 저장하고, 필요한 경우 다른 하이퍼파라미터를 조정하여 재훈련하세요.",
+      "date": "2025-06-13",
+      "completed": false,
+      "status": "pending"
+    },
+    {
+      "title": "코드 정리 및 문서화",
+      "description": "코드를 정리하고 주석을 추가하여 가독성을 높입니다.",
+      "tip": "코드를 간결하고 직관적으로 작성하세요.",
+      "date": "2025-06-14",
+      "completed": false,
+      "status": "pending"
+    },
+    {
+      "title": "최종 보고서 작성",
+      "description": "하이퍼파라미터, 최종 정확도, 학습 곡선 등을 포함한 짧은 보고서를 작성합니다.",
+      "tip": "보고서는 간결하면서도 핵심 내용을 잘 전달해야 합니다.",
+      "date": "2025-06-15",
+      "completed": false,
+      "status": "pending"
+    }
+  ]
+}
