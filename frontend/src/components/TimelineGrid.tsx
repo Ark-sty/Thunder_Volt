@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Assignment, Step } from '../context/AssignmentContext';
+import React, { useState, useMemo } from 'react';
+import { Assignment, Step, StepStatus, useAssignment } from '../context/AssignmentContext';
+import { useAuth } from '../context/AuthContext';
 import dayjs from 'dayjs';
 import { Dialog } from '@headlessui/react';
-
-interface TimelineGridProps {
-    assignments: Assignment[];
-}
 
 interface StepModalProps {
     isOpen: boolean;
@@ -29,10 +26,12 @@ const StepModal: React.FC<StepModalProps> = ({ isOpen, onClose, step, assignment
                             <h4 className="font-medium text-gray-700">Description</h4>
                             <p className="mt-1 text-gray-600">{step.description}</p>
                         </div>
-                        <div>
-                            <h4 className="font-medium text-gray-700">Tip</h4>
-                            <p className="mt-1 text-primary-600">{step.tip}</p>
-                        </div>
+                        {step.tip && (
+                            <div>
+                                <h4 className="font-medium text-gray-700">Tip</h4>
+                                <p className="mt-1 text-primary-600">{step.tip}</p>
+                            </div>
+                        )}
                     </div>
                     <div className="mt-6 flex justify-end">
                         <button
@@ -48,13 +47,12 @@ const StepModal: React.FC<StepModalProps> = ({ isOpen, onClose, step, assignment
     );
 };
 
-const TimelineGrid: React.FC<TimelineGridProps> = ({ assignments }) => {
-    const [dates, setDates] = useState<string[]>([]);
-    const [selectedStep, setSelectedStep] = useState<{ step: Step; assignmentTitle: string } | null>(null);
-    const [stepsByDate, setStepsByDate] = useState<Map<string, { step: Step; assignmentTitle: string }[]>>(new Map());
+const TimelineGrid: React.FC = () => {
+    const { assignments, updateStepStatus } = useAssignment();
+    const { user } = useAuth();
+    const [selectedStep, setSelectedStep] = useState<{ step: Step; assignmentTitle: string; assignmentId: string } | null>(null);
 
-    useEffect(() => {
-        // Generate dates from today to the latest due date
+    const dates = useMemo(() => {
         const today = dayjs();
         const latestDueDate = assignments.reduce((latest, assignment) => {
             const dueDate = dayjs(assignment.dueDate);
@@ -67,30 +65,44 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ assignments }) => {
             dateArray.push(currentDate.format('YYYY-MM-DD'));
             currentDate = currentDate.add(1, 'day');
         }
-        setDates(dateArray);
+        return dateArray;
+    }, [assignments]);
 
-        // Organize steps by date
-        const newStepsByDate = new Map<string, { step: Step; assignmentTitle: string }[]>();
-        dateArray.forEach(date => newStepsByDate.set(date, []));
+    const stepsByDate = useMemo(() => {
+        const newStepsByDate = new Map<string, { step: Step; assignmentTitle: string; assignmentId: string }[]>();
+        dates.forEach(date => newStepsByDate.set(date, []));
 
         assignments.forEach(assignment => {
-            assignment.analysis.steps.forEach(step => {
-                const stepDate = dayjs(step.date);
-                if (stepDate.isBefore(today)) {
-                    // Move steps from past dates to today
-                    const todayKey = today.format('YYYY-MM-DD');
-                    const existingSteps = newStepsByDate.get(todayKey) || [];
-                    newStepsByDate.set(todayKey, [...existingSteps, { step, assignmentTitle: assignment.analysis.title }]);
-                } else {
-                    const dateKey = stepDate.format('YYYY-MM-DD');
-                    const existingSteps = newStepsByDate.get(dateKey) || [];
-                    newStepsByDate.set(dateKey, [...existingSteps, { step, assignmentTitle: assignment.analysis.title }]);
-                }
+            assignment.analysis.steps.forEach(originalStep => {
+                const stepDate = dayjs(originalStep.date ?? assignment.dueDate);
+                const today = dayjs();
+                const targetDate = stepDate.isBefore(today) ? today.format('YYYY-MM-DD') : stepDate.format('YYYY-MM-DD');
+                const existingSteps = newStepsByDate.get(targetDate) || [];
+
+                // 🚩 항상 최신 상태의 step을 찾아서 집어넣기
+                const freshStep = assignment.analysis.steps.find(s => s.title === originalStep.title)!;
+
+                newStepsByDate.set(targetDate, [...existingSteps, {
+                    step: freshStep,
+                    assignmentTitle: assignment.analysis.title,
+                    assignmentId: assignment.id
+                }]);
             });
         });
 
-        setStepsByDate(newStepsByDate);
-    }, [assignments]);
+        return newStepsByDate;
+    }, [assignments, dates]);
+
+
+    const handleStepStatusChange = (assignmentId: string, stepTitle: string, completed: boolean) => {
+        if (!user?.email) return;
+        /* updateStepStatus 내부가 자동으로
+        ▸ 옵티미스틱 반영
+        ▸ 서버 요청
+        ▸ 실패 시 롤백
+        을 모두 처리합니다. */
+        updateStepStatus(assignmentId, stepTitle, completed);
+    };
 
     return (
         <div className="overflow-x-auto">
@@ -123,25 +135,34 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({ assignments }) => {
 
                                         return (
                                             <td key={date} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[200px]">
-                                                {assignmentSteps.map(({ step, assignmentTitle }, stepIndex) => (
+                                                {assignmentSteps.map(({ step, assignmentTitle, assignmentId }, stepIndex) => (
                                                     <div
                                                         key={stepIndex}
-                                                        className={`mb-2 p-2 rounded cursor-pointer ${step.completed
+                                                        className={`mb-2 p-2 rounded ${step.completed
                                                             ? 'bg-green-50 border border-green-200'
                                                             : step.status === 'overdue'
                                                                 ? 'bg-red-50 border border-red-200'
                                                                 : 'bg-yellow-50 border border-yellow-200'
                                                             }`}
-                                                        onClick={() => setSelectedStep({ step, assignmentTitle })}
                                                     >
                                                         <div className="flex items-center">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={step.completed}
-                                                                readOnly
-                                                                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                                                            />
-                                                            <span className="ml-2">{step.title}</span>
+                                                            <div className="relative flex items-center" onClick={(e) => e.stopPropagation()}>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={step.completed ?? false}
+                                                                    onChange={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleStepStatusChange(assignmentId, step.title, e.target.checked);
+                                                                    }}
+                                                                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer"
+                                                                />
+                                                            </div>
+                                                            <span
+                                                                className="ml-2 cursor-pointer flex-grow"
+                                                                onClick={() => setSelectedStep({ step, assignmentTitle, assignmentId })}
+                                                            >
+                                                                {step.title}
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 ))}

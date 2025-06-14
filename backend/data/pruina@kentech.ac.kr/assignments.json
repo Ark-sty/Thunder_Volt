@@ -1,0 +1,82 @@
+[
+  {
+    "id": "1749865591343",
+    "text": "",
+    "dueDate": "2025-06-21",
+    "analysis": {
+      "title": "ResNet을 이용한 CIFAR-100 이미지 분류",
+      "summary": "이 과제의 목적은 CIFAR-100 데이터셋을 활용하여 ResNet 기반 모델을 구현하고, 최소 80% 이상의 테스트 정확도를 달성하는 것입니다. 이를 위해 데이터 전처리, 모델 구현, 하이퍼파라미터 튜닝 등을 수행해야 합니다.",
+      "difficulty": "어려움",
+      "estimatedTime": "18시간",
+      "dueDate": "2025-06-21",
+      "steps": [
+        {
+          "title": "데이터셋 다운로드 및 전처리",
+          "description": "CIFAR-100 데이터셋을 다운로드하고, 적절한 데이터 전처리 및 증강 기법을 적용합니다.",
+          "tip": "torchvision.datasets.CIFAR100을 사용하여 쉽게 데이터셋을 다운로드할 수 있습니다.",
+          "date": "2025-06-13",
+          "completed": true,
+          "status": "completed"
+        },
+        {
+          "title": "ResNet 모델 구조 설계",
+          "description": "ResNet-18, ResNet-50 등의 모델을 설계하고, 마지막 레이어를 100개의 클래스를 출력하도록 수정합니다.",
+          "tip": "ImageNet으로 사전 학습된 가중치를 활용하면 학습 속도를 높일 수 있습니다.",
+          "date": "2025-06-14",
+          "completed": true,
+          "status": "completed"
+        },
+        {
+          "title": "학습 루프 구현",
+          "description": "CrossEntropyLoss와 적절한 옵티마이저를 사용하여 모델의 학습 루프를 구현합니다.",
+          "tip": "SGD에 momentum을 사용하거나 Adam을 사용하여 최적화할 수 있습니다.",
+          "date": "2025-06-15",
+          "completed": true,
+          "status": "completed"
+        },
+        {
+          "title": "하이퍼파라미터 튜닝",
+          "description": "학습률, 배치 크기, 에폭 수 등 하이퍼파라미터를 조정하여 모델 성능을 최적화합니다.",
+          "tip": "StepLR 또는 MultiStepLR 같은 학습률 스케줄러를 통해 학습 안정성을 높이세요.",
+          "date": "2025-06-16",
+          "completed": false,
+          "status": "pending"
+        },
+        {
+          "title": "모델 평가 및 정확도 측정",
+          "description": "테스트 데이터셋을 사용하여 모델의 최종 정확도를 측정하고 목표 정확도에 도달했는지 확인합니다.",
+          "tip": "충분한 반복을 통해 과적합을 방지하고 일반화 성능을 확인하세요.",
+          "date": "2025-06-17",
+          "completed": false,
+          "status": "pending"
+        },
+        {
+          "title": "코드 정리 및 문서화",
+          "description": "코드를 정리하고, 가독성을 높이기 위해 주석과 문서를 추가합니다.",
+          "tip": "코드의 구조가 깔끔하고 주석이 명확해야 감점 요소를 줄일 수 있습니다.",
+          "date": "2025-06-18",
+          "completed": false,
+          "status": "pending"
+        },
+        {
+          "title": "리포트 작성",
+          "description": "하이퍼파라미터 설정, 최종 정확도, 학습 곡선 등을 포함한 짧은 보고서를 작성합니다.",
+          "tip": "최종 결과와 튜닝 과정을 명확히 설명하면 보고서의 품질이 높아집니다.",
+          "date": "2025-06-19",
+          "completed": false,
+          "status": "pending"
+        },
+        {
+          "title": "최종 점검 및 제출 준비",
+          "description": "모든 파일과 보고서를 검토하고, 제출 요건을 확인한 후 제출을 준비합니다.",
+          "tip": "코드가 다른 환경에서 문제없이 실행되는지 테스트하세요.",
+          "date": "2025-06-20",
+          "completed": false,
+          "status": "pending"
+        }
+      ]
+    },
+    "createdAt": "2025-06-14T01:46:31.343Z",
+    "updatedAt": "2025-06-14T01:47:21.979Z"
+  }
+]

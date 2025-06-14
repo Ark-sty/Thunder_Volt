@@ -94,7 +94,7 @@ const RegisterForm: React.FC = () => {
             );
 
             // Redirect to dashboard on success
-            navigate('/dashboard');
+            navigate('/task-input');
         } catch (error: any) {
             console.error('Registration error:', error);
 

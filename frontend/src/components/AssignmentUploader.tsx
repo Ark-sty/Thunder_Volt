@@ -17,7 +17,7 @@ interface FormErrors {
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 
 const AssignmentUploader: React.FC = () => {
-    const { addAssignment } = useAssignment();
+    const { fetchAssignments } = useAssignment();
     const { user } = useAuth();
     const [formData, setFormData] = useState<FormData>({
         dueDate: null
@@ -102,11 +102,7 @@ const AssignmentUploader: React.FC = () => {
                 throw new Error(response.data.error);
             }
 
-            addAssignment({
-                title: response.data.analysis.title,
-                dueDate: formData.dueDate.toISOString().split('T')[0],
-                analysis: response.data.analysis
-            });
+            await fetchAssignments();
 
             // Reset form
             setFormData({

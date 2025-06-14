@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
@@ -9,14 +9,16 @@ dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 
 // Types
+export type StepStatus = 'completed' | 'pending' | 'overdue';
+
 export interface Step {
     title: string;
     description: string;
-    completed: boolean;
     tip?: string;
     date?: string;
-    status?: 'pending' | 'completed' | 'overdue';
     assignedDate?: string;
+    completed?: boolean;
+    status?: StepStatus;
 }
 
 export interface AssignmentAnalysis {
@@ -55,7 +57,7 @@ interface AssignmentContextType {
     getAssignmentById: (assignmentId: string) => Assignment | undefined;
     getOverdueSteps: (assignmentId: string) => Step[];
     getUpcomingSteps: (assignmentId: string) => Step[];
-    setAssignments: (assignments: Assignment[]) => void;
+    setAssignments: Dispatch<SetStateAction<Assignment[]>>;
 }
 
 const AssignmentContext = createContext<AssignmentContextType | undefined>(undefined);
@@ -74,26 +76,23 @@ export const AssignmentProvider: React.FC<{ children: ReactNode }> = ({ children
     const [error, setError] = useState<string | null>(null);
     const { user } = useAuth();
 
-    const fetchAssignments = async () => {
-        if (!user?.email) {
-            console.log('No user email available');
-            return;
-        }
+    const fetchAssignments = useCallback(async () => {
+        if (!user?.email) return;
 
         setLoading(true);
         setError(null);
         try {
-            console.log('Fetching assignments for:', user.email);
-            const response = await axios.get(`http://localhost:3001/api/assignments/${user.email}`);
-            console.log('Fetched assignments:', response.data);
-            setAssignments(response.data);
+            const { data } = await axios.get(
+                `http://localhost:3001/api/assignments/${user.email}`,
+            );
+            setAssignments(data);
         } catch (err) {
-            console.error('Error fetching assignments:', err);
             setError('Failed to fetch assignments');
         } finally {
             setLoading(false);
         }
-    };
+    }, [user?.email]);
+
 
     const addAssignment = async (assignment: Omit<Assignment, 'id' | 'createdAt' | 'updatedAt'>) => {
         if (!user?.email) return;
@@ -106,17 +105,46 @@ export const AssignmentProvider: React.FC<{ children: ReactNode }> = ({ children
             updatedAt: now,
         };
 
+        // AssignmentContext.tsx  (addAssignment 안)
         try {
-            const response = await axios.post(`http://localhost:3001/api/assignments/${user.email}`, newAssignment);
-            setAssignments(prev => [...prev, response.data]);
-        } catch (error) {
-            console.error('Failed to add assignment:', error);
+            const { data } = await axios.post(
+                `http://localhost:3001/api/assignments/${user.email}`,
+                newAssignment
+            );
+            setAssignments((prev) => [...prev, data]);
+            setError(null);            //성공 시 에러 초기화
+        } catch (err) {
+            console.error('Failed to add assignment:', err);
             setError('Failed to add assignment');
         }
+
     };
 
     const updateStepStatus = async (assignmentId: string, stepTitle: string, completed: boolean) => {
         if (!user?.email) return;
+
+        // Optimistically update the UI
+        const newStatus: StepStatus = completed ? 'completed' : 'pending';
+
+        // Create a new assignments array with the updated step
+        const updatedAssignments = assignments.map(assignment =>
+            assignment.id === assignmentId
+                ? {
+                    ...assignment,
+                    analysis: {
+                        ...assignment.analysis,
+                        steps: assignment.analysis.steps.map(step =>
+                            step.title === stepTitle
+                                ? { ...step, completed, status: newStatus }
+                                : step
+                        )
+                    }
+                }
+                : assignment
+        );
+
+        // Update state once
+        setAssignments(updatedAssignments);
 
         try {
             const response = await axios.put(
@@ -124,13 +152,35 @@ export const AssignmentProvider: React.FC<{ children: ReactNode }> = ({ children
                 { stepTitle, completed }
             );
 
-            setAssignments(prevAssignments =>
-                prevAssignments.map(assignment =>
-                    assignment.id === assignmentId ? response.data : assignment
-                )
-            );
+            // Only update if the server response is different from our optimistic update
+            if (JSON.stringify(response.data) !== JSON.stringify(updatedAssignments.find(a => a.id === assignmentId))) {
+                setAssignments(prevAssignments =>
+                    prevAssignments.map(assignment =>
+                        assignment.id === assignmentId ? response.data : assignment
+                    )
+                );
+            }
         } catch (err) {
             console.error('Error updating step status:', err);
+            // Revert on error
+            const revertStatus: StepStatus = !completed ? 'completed' : 'pending';
+            setAssignments(prevAssignments =>
+                prevAssignments.map(assignment =>
+                    assignment.id === assignmentId
+                        ? {
+                            ...assignment,
+                            analysis: {
+                                ...assignment.analysis,
+                                steps: assignment.analysis.steps.map(step =>
+                                    step.title === stepTitle
+                                        ? { ...step, completed: !completed, status: revertStatus }
+                                        : step
+                                )
+                            }
+                        }
+                        : assignment
+                )
+            );
             setError('Failed to update step status');
         }
     };
@@ -199,7 +249,7 @@ export const AssignmentProvider: React.FC<{ children: ReactNode }> = ({ children
             console.log('User email changed, fetching assignments...');
             fetchAssignments();
         }
-    }, [user?.email]);
+    }, [user?.email, fetchAssignments]);
 
     return (
         <AssignmentContext.Provider

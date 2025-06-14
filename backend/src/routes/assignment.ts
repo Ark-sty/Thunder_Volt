@@ -167,26 +167,44 @@ router.put('/assignments/:email/:assignmentId', (req, res) => {
         const { email, assignmentId } = req.params;
         const { stepTitle, completed } = req.body;
 
+        console.log('Updating step status:', { email, assignmentId, stepTitle, completed });
+
         const assignments = getAssignmentsByEmail(email);
         const assignmentIndex = assignments.findIndex(a => a.id === assignmentId);
 
         if (assignmentIndex === -1) {
+            console.error('Assignment not found:', assignmentId);
             return res.status(404).json({ error: 'Assignment not found' });
         }
 
         const assignment = assignments[assignmentIndex];
-        assignment.analysis.steps = assignment.analysis.steps.map(step => {
-            if (step.title === stepTitle) {
-                return {
-                    ...step,
-                    completed,
-                    status: completed ? 'completed' : 'pending'
-                };
-            }
-            return step;
+        const stepIndex = assignment.analysis.steps.findIndex(step => step.title === stepTitle);
+
+        if (stepIndex === -1) {
+            console.error('Step not found:', stepTitle);
+            return res.status(404).json({ error: 'Step not found' });
+        }
+
+        // Update the step status
+        assignment.analysis.steps[stepIndex] = {
+            ...assignment.analysis.steps[stepIndex],
+            completed,
+            status: completed ? 'completed' : 'pending'
+        };
+
+        // Update the assignment's updatedAt timestamp
+        assignment.updatedAt = new Date().toISOString();
+
+        // Save the updated assignments
+        saveAssignments(email, assignments);
+
+        console.log('Step status updated successfully:', {
+            assignmentId,
+            stepTitle,
+            completed,
+            status: assignment.analysis.steps[stepIndex].status
         });
 
-        saveAssignments(email, assignments);
         res.json(assignment);
     } catch (error) {
         console.error('Error updating assignment:', error);
@@ -209,6 +227,31 @@ router.delete('/assignments/:email/:assignmentId', (req, res) => {
 });
 
 // Analyze assignment
+// routes/assignment.ts  (기존 코드 하단에 추가)
+router.post('/assignments/:email', (req, res) => {
+    try {
+        const { email } = req.params;
+        const assignment = req.body as Assignment;
+
+        if (!assignment || !assignment.analysis?.title) {
+            return res.status(400).json({ error: 'Invalid assignment payload' });
+        }
+
+        const assignments = getAssignmentsByEmail(email);
+        assignments.push({
+            ...assignment,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        });
+
+        saveAssignments(email, assignments);
+        res.status(201).json(assignment);
+    } catch (err) {
+        console.error('Error adding assignment:', err);
+        res.status(500).json({ error: 'Failed to add assignment' });
+    }
+});
+
 router.post('/analyze', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
@@ -222,12 +265,6 @@ router.post('/analyze', upload.single('file'), async (req, res) => {
             return res.status(400).json({ error: 'Due date and username are required' });
         }
 
-        console.log('File received:', {
-            originalname: req.file.originalname,
-            mimetype: req.file.mimetype,
-            size: req.file.size
-        });
-
         const analysis = await analyzeAssignment(req.file.buffer, dueDate, username);
         const assignment: Assignment = {
             id: Date.now().toString(),
@@ -235,18 +272,19 @@ router.post('/analyze', upload.single('file'), async (req, res) => {
             dueDate,
             analysis: analysis.analysis,
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
         };
 
         const assignments = getAssignmentsByEmail(username);
         assignments.push(assignment);
         saveAssignments(username, assignments);
 
-        res.json(assignment);
-    } catch (error) {
-        console.error('Error analyzing assignment:', error);
-        res.status(500).json({ error: 'Failed to analyze assignment' });
+        return res.status(201).json(assignment);
+    } catch (err) {
+        console.error('Error analyzing assignment:', err);
+        return res.status(500).json({ error: 'Failed to analyze assignment' });
     }
 });
+
 
 export default router; 
